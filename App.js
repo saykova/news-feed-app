@@ -6,6 +6,8 @@ import SettingsScreen from './src/screens/SettingsScreen';
 import NewsScreen from './src/screens/NewsScreen';
 import CategoryNewsScreen from './src/screens/CategoryNewsScreen';
 import NewsDetailsScreen from './src/screens/NewsDetailsScreen';
+import { Provider } from 'mobx-react';
+import NewsStore from './src/storage/NewsStore';
 
 const NewsStack = createStackNavigator(
   {
@@ -74,6 +76,8 @@ const AppTabNavigator = createAppContainer(AppNavigation);
 
 export default function App() {
   return (
-    <AppTabNavigator />
+    <Provider store={NewsStore}>
+      <AppTabNavigator />
+    </Provider>
   );
 }

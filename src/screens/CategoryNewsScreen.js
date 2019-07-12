@@ -1,44 +1,57 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { StyleSheet, Text, View, FlatList } from 'react-native';
+import { ListItem } from 'react-native-elements';
+import { inject, observer } from 'mobx-react';
 
-export default class CategoryNewsScreen extends Component {
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            news: []
+class CategoryNewsScreen extends Component {
+    static navigationOptions ({ navigation }) {
+        return {
+            headerTitle: 'Category ' + navigation.getParam('category'),
         }
     }
 
-    fetchNews = (category) => {
-        const urlString = 'https://newsapi.org/v2/top-headlines?category=' + category + '&apiKey=a938696adaf041b296f2f27e24f5ac01';
-
-        const news = fetch(urlString)
-            .then((response) => response.json())
-            .then((responseJson) => {
-                console.log(responseJson.articles);
-                
-            });
-
-        console.log(urlString,news.totalResults);
-
-        this.setState({ news: news });
+    constructor(props) {
+        super(props);
+        this.props.store.setCurrentCategory(this.props.navigation.getParam('category'));
     }
 
-    componentDidMount = () => {
-        this.fetchNews(this.props.navigation.getParam('category'));
-    };
+    keyExtractor = (item, index) => index.toString();
+
+    renderItem = ({item}) => (
+        <ListItem
+            title={item.title}
+            leftAvatar={{ rounded: false, source: { uri: item.urlToImage } }}
+            onPress={() => this.props.navigation.navigate('Details', {article: item})}
+        />
+    );
+
+    renderSeparator = () => {
+        return (
+            <View style={styles.separator} />
+        );
+    }
 
     render() {
         return (
-            <View>
-                <Text>Category screen</Text>
-                <TouchableOpacity
-                    onPress={(article) => this.props.navigation.navigate('Details', {article})}>
-                    <Text>News title</Text>
-                </TouchableOpacity>
-            </View>
-        )
+            <FlatList
+                keyExtractor={this.keyExtractor}
+                data={this.props.store.getCategoryNews}
+                renderItem={this.renderItem}
+                refreshing={this.props.store.state.isRefreshing}
+                onRefresh={this.props.store.refreshing}
+                ItemSeparatorComponent={this.renderSeparator}
+            />
+        );
     }
 }
+
+const styles = StyleSheet.create({
+    separator: {
+        height: 1,
+        width: "86%",
+        backgroundColor: "#CED0CE",
+        marginLeft: "15%"
+    }
+});
+
+export default inject('store')(observer(CategoryNewsScreen));
