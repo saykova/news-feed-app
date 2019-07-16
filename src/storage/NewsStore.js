@@ -1,11 +1,11 @@
-import { action, observable, decorate } from 'mobx';
+import { action, observable, decorate, runInAction } from 'mobx';
 
 class NewsStore {
 
   constructor() {
     this.categories = ['technology', 'science', 'health'];
     this.state = {
-      news: [],
+      news: {},
       currentCategory: '',
       isRefreshing: true,
     }
@@ -18,17 +18,22 @@ class NewsStore {
     const response = await fetch(urlString),
           responseJson = await response.json(),
           news = responseJson.articles.map(item => {
-            return {...item, key: (item.publishedAt || '') +  Date.now()}
+            return {...item, key: (item.publishedAt || '') + Date.now() + Math.floor(Math.random() * 1000)}
           })
     
     return news;
   }
 
-  setCategories = () => {
-    this.categories.forEach(async (category) => {
-      const categoryData = await this.fetchNews(category);
-      this.state.news[category] = categoryData;
+  setCategories = async () => {
+
+    const categoryNews = await Promise.all(this.categories.map((category) => {
+        return this.fetchNews(category);
+    }));
+
+    categoryNews.forEach((item, index) => {
+        this.state.news[this.categories[index]] = item;
     });
+
     this.state.isRefreshing = false;
   }
 
@@ -46,12 +51,20 @@ class NewsStore {
   get getCategoryNews() {
     return this.state.news[this.state.currentCategory];
   }
+
+  getNewsByKey = (key) => {
+    let newsContent = this.state.news[this.state.currentCategory].find(news => {
+        return news.key === key
+    });
+    return newsContent;
+  }
 }
 
 decorate(NewsStore, {
   currentCategory: observable,
   isRefreshing: observable,
-  setCurrentCategory: action
+  setCurrentCategory: action,
+  getNewsByKey: action
 });
 
 const newsStore = new NewsStore();

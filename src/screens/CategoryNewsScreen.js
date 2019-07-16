@@ -15,15 +15,19 @@ class CategoryNewsScreen extends Component {
         this.props.store.setCurrentCategory(this.props.navigation.getParam('category'));
     }
 
-    keyExtractor = (item, index) => index.toString();
+    keyExtractor = (item, key) => key.toString();
 
-    renderItem = ({item}) => (
-        <ListItem
-            title={item.title}
-            leftAvatar={{ rounded: false, source: { uri: item.urlToImage } }}
-            onPress={() => this.props.navigation.navigate('Details', {article: item})}
-        />
-    );
+    renderItem = ({item}) =>{
+        let src = (item.urlToImage) ? item.urlToImage : 'http://denrakaev.com/wp-content/uploads/2015/03/no-image.png';
+
+        return (
+            <ListItem
+                title={item.title}
+                leftAvatar={{ rounded: false, source: { uri: src } }}
+                onPress={() => this.props.navigation.navigate('Details', {articleKey: item.key})}
+            />
+        ); 
+    } 
 
     renderSeparator = () => {
         return (

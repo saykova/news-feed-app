@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, Image } from 'react-native';
+import { inject, observer } from 'mobx-react';
 
-export default class NewsDetailsScreen extends Component {
+class NewsDetailsScreen extends Component {
 
     constructor(props) {
         super(props)
     }
 
     render() {
-        let article = this.props.navigation.getParam('article');
+        const articleKey = this.props.navigation.getParam('articleKey'),
+            article = this.props.store.getNewsByKey(articleKey);
 
         return (
             <ScrollView>
@@ -23,3 +25,5 @@ export default class NewsDetailsScreen extends Component {
         )
     }
 }
+
+export default inject('store')(observer(NewsDetailsScreen));
